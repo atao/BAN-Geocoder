@@ -126,7 +126,7 @@ if json_data["features"] == []:
     print("Exiting...")
     sys.exit()
 if args.gps:
-    print("coordinates :",gps(json_data))
+    print("Coordinates :",gps(json_data))
 if args.score:
     print("Score :", score(json_data))
 if args.csv:
