@@ -1,4 +1,4 @@
-# BAN-Geocoder
+# BANO-Geocoder
 Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/) - BANO
 
 ```
