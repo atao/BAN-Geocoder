@@ -1,5 +1,5 @@
 # BAN-Geocoder
-Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/) - BAN
+Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/) - BANO
 
 ```
 root@kali:~# python3 ban_geocoder.py -h
