@@ -1,5 +1,5 @@
 # Geocoder for adresse.data.gouv.fr
-Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/) - BANO
+Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/).
 
 ```
 root@kali:~# python3 ban_geocoder.py -h
