@@ -1,3 +1,4 @@
+[![Pylint](https://github.com/atao/BAN-Geocoder/actions/workflows/pylint.yml/badge.svg)](https://github.com/atao/BAN-Geocoder/actions/workflows/pylint.yml)
 # Geocoder for adresse.data.gouv.fr
 Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/).
 
