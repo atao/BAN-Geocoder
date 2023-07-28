@@ -38,7 +38,8 @@ def geocodage(verbose, address):
 @click.option('--verbose', '-v', is_flag=True, help="Verbose mode")
 @click.option('--address', '-a', help='Address to be geocoded', required=True, type=str)
 @click.option('--nb', '-n', help='Number of results to return  [default=1]', default=0, show_default=False, type=int)
-def cli(verbose, address, nb):
+@click.option('--gps', is_flag=True, help='Show only GPS coordinates')
+def cli(verbose, address, nb, gps):
     if verbose:
         print("Geocoding addresses using the national address database API - https://adresse.data.gouv.fr/ - BAN")
     address = geocodage(verbose, address)
@@ -47,20 +48,26 @@ def cli(verbose, address, nb):
         i = 0
         if nb!=0:
             nb = nb - 1
-        if verbose:
-            print("{:10} {:10} {:18} {:10}".format("Longitude", "Latitude", "Score", "Address"))
         for _ in address:
-            print("{:10} {:10} {:10} {:10}".format(address[i].split(";")[3], address[i].split(";")[2],
-                                                   address[i].split(";")[1], address[i].split(";")[0]))
-            if nb == nbresults:
-                pass
-            elif nb > nbresults:
-                nb = nbresults
-            elif nb == i:
-                break
-            else:
-                pass
-            i = i + 1
+            if gps:
+                if verbose:
+                    print("{:10} {:10}".format("Longitude", "Latitude"))
+                print("{:10} {:10}".format(address[i].split(";")[3], address[i].split(";")[2]))
+            if not gps:
+                if verbose:
+                    print("{:10} {:10} {:18} {:10}".format("Longitude", "Latitude", "Score", "Address"))
+
+                    print("{:10} {:10} {:10} {:10}".format(address[i].split(";")[3], address[i].split(";")[2],
+                                                           address[i].split(";")[1], address[i].split(";")[0]))
+                    if nb == nbresults:
+                        pass
+                    elif nb > nbresults:
+                        nb = nbresults
+                    elif nb == i:
+                        break
+                    else:
+                        pass
+                    i = i + 1
 
 
 if __name__ == '__main__':
