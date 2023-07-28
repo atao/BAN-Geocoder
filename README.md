@@ -2,56 +2,31 @@
 # Geocoder for adresse.data.gouv.fr
 Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/).
 
-```
-root@kali:~# python3 ban_geocoder.py -h
-usage: ban_geocoder.py [-h] [-v] [-a ADDRESS] [--lat LAT] [--lon LON] [-s]
-                       [-g] [--csv] [--version]
-
-Geocoding addresses using the national address database API -
-https://adresse.data.gouv.fr/ - BAN The data come from IGN, La Poste, DGFiP,
-Etalab and OpenStreetMap France.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --verbose         increase output verbosity
-  -a ADDRESS, --address ADDRESS
-                        enter the address to geocoder
-  -s, --score           show score
-  -g, --gps             show coordinates
-  --csv                 show all in csv format
-  --version             show version
-
-  --lat LAT, --latitude LAT
-                        enter Latitude
-  --lon LON, --longitude LON
-                        enter Longitude
-```
-
-## Features
-* Works on Windows and Linux
-* Address spelling correction
-* Address geocoding
-* Reverse address geocoding
-* Export to CSV format
-
 ## Requirements
-* Python 3
-* librarie :
-  - requests (That can be installed using `pip install requests`)
+```
+pip install -r requirements.txt
+```
 
-## Examples
-I want the coordinates of the Elysée and get the score :
+## Usage and options
 ```
-root@kali:~# python3 ban_geocoder.py -a "55 rue Faubourg Saint-Honoré" --gps -s
-55 Rue du Faubourg Saint-Honoré 75008 Paris
-Coordinates : 2.31698, 48.870675
-Score : 0.8598454545454546
+Usage: ban_geocoder.py [OPTIONS]
+
+Options:
+  -v, --verbose       Verbose mode
+  -a, --address TEXT  Address to be geocoded  [required]
+  -n, --nb INTEGER    Number of results to return  [default=1]
+  -h, --help          Show this message and exit.
 ```
-Get the address corresponding to these coordinates and export to CSV :
+
+## Example
 ```
-root@kali:~# python3 ban_geocoder.py --lon 2.31698 --lat 48.870675 --csv
-55 Rue du Faubourg Saint-Honoré 75008 Paris
-55;Rue du Faubourg Saint-Honoré;75008;Paris;2.31698, 48.870675
+Me # python ban_geocoder.py -a "55 rue Faubourg Saint-Honoré" -v
+Geocoding addresses using the national address database API - https://adresse.data.gouv.fr/ - BAN
+[+] Geocoding address...
+Longitude  Latitude   Score              Address
+48.87063   2.316931   0.8035072727272727 55 Rue du Faubourg Saint-Honoré 75008 Paris
 ```
+
 ## See also
-* [BanR](https://github.com/joelgombin/banR) : R client for the BAN API 
+* [BanR](https://github.com/joelgombin/banR) : R client for the BAN API
+* [tidygeocoder](https://github.com/jessecambon/tidygeocoder), r package similar to banR using other geocoding services such as US Census geocoder, Nominatim (OSM), Geocodio, and Location IQ.
