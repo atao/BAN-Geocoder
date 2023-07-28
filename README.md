@@ -15,6 +15,7 @@ Options:
   -v, --verbose       Verbose mode
   -a, --address TEXT  Address to be geocoded  [required]
   -n, --nb INTEGER    Number of results to return  [default=1]
+  --gps               Show only GPS coordinates
   -h, --help          Show this message and exit.
 ```
 
