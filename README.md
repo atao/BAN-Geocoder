@@ -86,7 +86,7 @@ Options:
 ```
 *with database export*
 ```
-(.venv) ME > python .\ban_geocoder.py geo -a "55 rue Faubourg Saint-Honoré" -v -csv address
+(.venv) ME > python .\ban_geocoder.py geo -a "55 rue Faubourg Saint-Honoré" -v -d address
 [+] Geocoding address : 55 rue Faubourg Saint-Honoré
 -------------------------------------------------------------
    geometry_coordinates                             properties_label
