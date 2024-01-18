@@ -1,6 +1,9 @@
 [![Pylint](https://github.com/atao/BAN-Geocoder/actions/workflows/pylint.yml/badge.svg)](https://github.com/atao/BAN-Geocoder/actions/workflows/pylint.yml)
-# Geocoder for adresse.data.gouv.fr
-Geocoding addresses using the national address database API - [adresse.data.gouv.fr](https://adresse.data.gouv.fr/).
+# BAN Geocoder
+🗺️ Geocoding addresses with BAN !
+
+## Purpose
+The [Base Adresse Nationale (BAN)](https://adresse.data.gouv.fr/) is the reference address database in France, containing the correspondence between non-nominative addresses (number, street name, lieu-dit and commune) and the geographical position of over 25 million addresses in France.
 
 ## Requirements
 ```
@@ -9,23 +12,87 @@ pip install -r requirements.txt
 
 ## Usage and options
 ```
-Usage: ban_geocoder.py [OPTIONS]
+Usage: ban_geocoder.py [OPTIONS] COMMAND [ARGS]...
 
 Options:
-  -v, --verbose       Verbose mode
-  -a, --address TEXT  Address to be geocoded  [required]
-  -n, --nb INTEGER    Number of results to return  [default=1]
-  --gps               Show only GPS coordinates
-  -h, --help          Show this message and exit.
+  --help  Show this message and exit.
+
+Commands:
+  file  Geocoding addresses from file.
+  geo   Geocoding a single address.
+
+```
+- *Command geo*
+```
+Usage: ban_geocoder.py geo [OPTIONS]
+
+  Geocoding a single address.
+
+Options:
+  -a, --address TEXT              Address to geocode  [required]
+  -l, --limit INTEGER             Number of results for each geocoding.
+                                  [default: 0]
+  -csv, --output-csv PATH         Path to CSV file where results will be
+                                  saved.
+  -hdr, --include-header          Include header row in the CSV output.
+  -idx, --include-index           Include DataFrame index in the CSV / SQL
+                                  output.
+  -d, --sqlite PATH               Path to SQLite database file where results
+                                  will be saved.
+  -t, --table-name TEXT           Name of the table to insert data into in the
+                                  SQLite database.  [default: data]
+  -m, --mode [fail|replace|append]
+                                  How to behave if the file already exists.
+                                  [default: append]
+  -v, --verbose                   More information displayed.
+  --help                          Show this message and exit.
+```
+- *Command file*
+```
+Usage: ban_geocoder.py file [OPTIONS]
+
+  Geocoding addresses from file.
+
+Options:
+  -i, --input-file PATH           Addresses file to geocode  [required]
+  -l, --limit INTEGER             Number of results for each geocoding.
+                                  [default: 0]
+  -csv, --output-csv PATH         Path to CSV file where results will be
+                                  saved.
+  -hdr, --include-header          Include header row in the CSV output.
+  -idx, --include-index           Include DataFrame index in the CSV / SQL
+                                  output.
+  -d, --sqlite PATH               Path to SQLite database file where results
+                                  will be saved.
+  -t, --table-name TEXT           Name of the table to insert data into in the
+                                  SQLite database.  [default: data]
+  -m, --mode [fail|replace|append]
+                                  How to behave if the file already exists.
+                                  [default: append]
+  -v, --verbose                   More information displayed.
+  --help                          Show this message and exit.
 ```
 
-## Example
+## Examples
+*with csv export*
 ```
-Me # python ban_geocoder.py -a "55 rue Faubourg Saint-Honoré" -v
-Geocoding addresses using the national address database API - https://adresse.data.gouv.fr/ - BAN
-[+] Geocoding address...
-Longitude  Latitude   Score              Address
-48.87063   2.316931   0.8035072727272727 55 Rue du Faubourg Saint-Honoré 75008 Paris
+(.venv) ME > python .\ban_geocoder.py geo -a "55 rue Faubourg Saint-Honoré" -v -csv address
+[+] Geocoding address : 55 rue Faubourg Saint-Honoré
+-------------------------------------------------------------
+   geometry_coordinates                             properties_label
+0  [2.316931, 48.87063]  55 Rue du Faubourg Saint-Honoré 75008 Paris
+-------------------------------------------------------------
+[+] Data exported successfully to "address.csv".
+```
+*with database export*
+```
+(.venv) ME > python .\ban_geocoder.py geo -a "55 rue Faubourg Saint-Honoré" -v -csv address
+[+] Geocoding address : 55 rue Faubourg Saint-Honoré
+-------------------------------------------------------------
+   geometry_coordinates                             properties_label
+0  [2.316931, 48.87063]  55 Rue du Faubourg Saint-Honoré 75008 Paris
+-------------------------------------------------------------
+[+] Data exported successfully to table "data" in database "address.db".
 ```
 
 ## See also
