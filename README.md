@@ -80,7 +80,7 @@ Options:
 [+] Geocoding address : 55 rue Faubourg Saint-Honoré
 -------------------------------------------------------------
    geometry_coordinates                             properties_label
-0  [2.316931, 48.87063]  55 Rue du Faubourg Saint-Honoré 75008 Paris
+   [48.87063, 2.316931]  55 Rue du Faubourg Saint-Honoré 75008 Paris
 -------------------------------------------------------------
 [+] Data exported successfully to "address.csv".
 ```
@@ -90,7 +90,7 @@ Options:
 [+] Geocoding address : 55 rue Faubourg Saint-Honoré
 -------------------------------------------------------------
    geometry_coordinates                             properties_label
-0  [2.316931, 48.87063]  55 Rue du Faubourg Saint-Honoré 75008 Paris
+   [48.87063, 2.316931]  55 Rue du Faubourg Saint-Honoré 75008 Paris
 -------------------------------------------------------------
 [+] Data exported successfully to table "data" in database "address.db".
 ```
