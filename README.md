@@ -2,7 +2,7 @@
 # BAN Geocoder
 🗺️ Geocoding addresses with BAN !
 
-# Features
+## Features
 - Geocoding online using the [Base Adresse Nationale API](https://adresse.data.gouv.fr/)
 - Geocoding offline using a local BAN database created with [CSV from BAN](https://adresse.data.gouv.fr/data/ban/adresses/latest/csv).
 
