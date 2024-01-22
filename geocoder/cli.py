@@ -2,7 +2,8 @@ import click
 import pandas as pd
 from .geocoder import perform_geocoding
 from .exporter import export_to_csv, export_to_sqlite
-
+from .database import import_csv_to_sqlite
+from .utils import uncompress_gz_to_csv, download_csv
 
 @click.group
 def cli():
@@ -100,5 +101,32 @@ def geocoding_from_file(input_file, limit, output_csv, sqlite, table_name, inclu
     return geocoded
 
 
+@click.command(name="initdb")
+@click.option('--ban-url', '-csv', type=str, help='URL or file path to the BAN (Base Adresse Nationale) CSV datasheet.',
+              default='https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz', show_default=True)
+@click.option('--ban-db', '-db', type=click.Path(writable=True), default='ban.db', show_default=True,
+              help='File path to the SQLite database.')
+@click.option('--separator', '-sep', default=";", show_default=True, help='CSV field separator.')
+@click.option('--chunksize', '-chk', default=10000, show_default=True, help='Number of rows per chunk to process.')
+@click.option('--verbose', '-v', is_flag=True, help="More information displayed.")
+def initdb(ban_url, ban_db, separator, chunksize, verbose):
+    """
+    Creating local database with BAN datasheet to geocoding offline.
+    """
+    ban_gz = ban_url.split("/")[-1]
+    ban_csv = ban_gz.replace(".csv.gz", ".csv")
+
+    # Download the CSV.GZ file from the provided URL
+    download_csv(url=ban_url, output_path=ban_gz, verbose=verbose)  # This function should return the path to the downloaded file
+
+    # Uncompress the GZ file to CSV
+    uncompress_gz_to_csv(gz_file_path=ban_gz, csv_file_path=ban_csv, verbose=verbose)  # This function should return the path to the uncompressed CSV
+
+    # Import the CSV into the SQLite database
+    import_csv_to_sqlite(csv_file_path=ban_csv, sqlite_db_path=ban_db, table_name="adresses-france",
+                         separator=separator, chunksize=chunksize, verbose=verbose)
+
+
 cli.add_command(geocoding)
 cli.add_command(geocoding_from_file)
+cli.add_command(initdb)
