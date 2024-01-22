@@ -2,6 +2,10 @@
 # BAN Geocoder
 🗺️ Geocoding addresses with BAN !
 
+# Features
+- Geocoding online using the [Base Adresse Nationale API](https://adresse.data.gouv.fr/)
+- Geocoding offline using a local BAN database created with [CSV from BAN](https://adresse.data.gouv.fr/data/ban/adresses/latest/csv).
+
 ## Purpose
 The [Base Adresse Nationale (BAN)](https://adresse.data.gouv.fr/) is the reference address database in France, containing the correspondence between non-nominative addresses (number, street name, lieu-dit and commune) and the geographical position of over 25 million addresses in France.
 
