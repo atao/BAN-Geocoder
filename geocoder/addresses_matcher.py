@@ -33,7 +33,7 @@ class AddressesMatcher:
         if self.verbose:
             print(f"[+] Fetching addresses from {self.database}...")
         cursor.execute(
-            "SELECT numero || ' ' || rep || ' ' || nom_voie || ' ' || code_postal || ' ' || nom_commune AS address FROM addresses_france")
+            "SELECT numero || ' ' || rep || ' ' || nom_voie || ' ' || code_postal || ' ' || nom_commune AS address FROM addresses")
         addresses = [row[0] for row in cursor.fetchall()]
         conn.close()  # Close the connection after fetching the data
 
@@ -74,7 +74,7 @@ class AddressesMatcher:
                 # Address query with consideration for "rep" values and the "where_clause"
                 cursor.execute(f""" SELECT CASE WHEN rep IS NOT NULL AND trim(rep) != '' THEN numero || ' ' || rep || ' ' 
                 || nom_voie ELSE numero || ' ' || nom_voie END || ' ' || code_postal || ' ' || nom_commune AS address, 
-                lat, lon FROM addresses_france WHERE {where_clause}
+                lat, lon FROM addresses WHERE {where_clause}
                             """)
 
                 # Fetch the results including address, lat, and lon
