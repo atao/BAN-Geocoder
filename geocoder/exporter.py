@@ -4,6 +4,14 @@ import sqlite3
 def export_to_csv(data, file, mode, header, index, verbose):
     """
     Export data to a CSV file.
+
+    Parameters:
+    - data (DataFrame): The pandas DataFrame to export.
+    - file (str): The file path where the CSV will be saved.
+    - mode (str): Writing mode for the CSV file ('w' for write, 'a' for append, etc.).
+    - header (bool): Flag to include the header row in the CSV output.
+    - index (bool): Flag to include the DataFrame index in the CSV output.
+    - verbose (bool): Flag to enable verbose output, which prints additional information.
     """
     if not file.endswith(".csv"):
         file = "{}.csv".format(file)
@@ -15,6 +23,14 @@ def export_to_csv(data, file, mode, header, index, verbose):
 def export_to_sqlite(data, database, table, mode, index, verbose):
     """
     Export data to an SQLite database.
+
+    Parameters:
+    - data (DataFrame): The pandas DataFrame to export.
+    - database (str): The file path of the SQLite database.
+    - table (str): The name of the table to insert data into in the SQLite database.
+    - mode (str): How to behave if the table already exists ('fail', 'replace', 'append').
+    - index (bool): Flag to include the DataFrame index in the SQLite output.
+    - verbose (bool): Flag to enable verbose output, which prints additional information.
     """
     if not database.endswith(".db"):
         database = '{}.db'.format(database)

@@ -6,6 +6,18 @@ import requests
 
 
 def perform_geocoding(address, limit, verbose):
+    """
+    Perform geocoding for a given address using an external geocoding API.
+
+    Parameters:
+    - address (str): The address to geocode.
+    - limit (int): The maximum number of results to return.
+    - verbose (bool): Flag to enable verbose output.
+
+    Returns:
+    - geocoded (DataFrame): A pandas DataFrame containing geocoded results,
+      including coordinates and address labels.
+    """
     if verbose:
         print("[+] Geocoding address : {}".format(address))
     address = urllib.parse.quote(address)
