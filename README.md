@@ -14,38 +14,16 @@ pip install -r requirements.txt
 ```
 Usage: ban_geocoder.py [OPTIONS] COMMAND [ARGS]...
 
+  🗺️ Geocoding addresses with BAN !
+
 Options:
   --help  Show this message and exit.
 
 Commands:
-  file  Geocoding addresses from file.
-  geo   Geocoding a single address.
-
-```
-- *Command geo*
-```
-Usage: ban_geocoder.py geo [OPTIONS]
-
-  Geocoding a single address.
-
-Options:
-  -a, --address TEXT              Address to geocode  [required]
-  -l, --limit INTEGER             Number of results for each geocoding.
-                                  [default: 0]
-  -csv, --output-csv PATH         Path to CSV file where results will be
-                                  saved.
-  -hdr, --include-header          Include header row in the CSV output.
-  -idx, --include-index           Include DataFrame index in the CSV / SQL
-                                  output.
-  -d, --sqlite PATH               Path to SQLite database file where results
-                                  will be saved.
-  -t, --table-name TEXT           Name of the table to insert data into in the
-                                  SQLite database.  [default: data]
-  -m, --mode [fail|replace|append]
-                                  How to behave if the file already exists.
-                                  [default: append]
-  -v, --verbose                   More information displayed.
-  --help                          Show this message and exit.
+  file    Geocoding addresses from file.
+  geo     Geocoding a single address.
+  initdb  Creating local database with BAN datasheet to geocoding offline.
+  local   Local geocoding using BAN database.
 ```
 - *Command file*
 ```
@@ -62,7 +40,7 @@ Options:
   -hdr, --include-header          Include header row in the CSV output.
   -idx, --include-index           Include DataFrame index in the CSV / SQL
                                   output.
-  -d, --sqlite PATH               Path to SQLite database file where results
+  -db, --output-db PATH           Path to SQLite database file where results
                                   will be saved.
   -t, --table-name TEXT           Name of the table to insert data into in the
                                   SQLite database.  [default: data]
@@ -71,6 +49,78 @@ Options:
                                   [default: append]
   -v, --verbose                   More information displayed.
   --help                          Show this message and exit.
+```
+- *Command geo*
+```
+Usage: ban_geocoder.py geo [OPTIONS]
+
+  Geocoding a single address.
+
+Options:
+  -a, --address TEXT              Address to geocode  [required]
+  -l, --limit INTEGER             Number of results for each geocoding.
+                                  [default: 0]
+  -csv, --output-csv PATH         Path to CSV file where results will be
+                                  saved.
+  -hdr, --include-header          Include header row in the CSV output.
+  -idx, --include-index           Include DataFrame index in the CSV / SQL
+                                  output.
+  -db, --output-db PATH           Path to SQLite database file where results
+                                  will be saved.
+  -t, --table-name TEXT           Name of the table to insert data into in the
+                                  SQLite database.  [default: data]
+  -m, --mode [fail|replace|append]
+                                  How to behave if the file already exists.
+                                  [default: append]
+  -v, --verbose                   More information displayed.
+  --help                          Show this message and exit.
+```
+- *Command initdb*
+```
+Usage: ban_geocoder.py initdb [OPTIONS]
+
+  Creating local database with BAN datasheet to geocoding offline.
+
+Options:
+  -csv, --ban-url TEXT       URL or file path to the BAN (Base Adresse
+                             Nationale) CSV datasheet.  [default: https://adre
+                             sse.data.gouv.fr/data/ban/adresses/latest/csv/adr
+                             esses-france.csv.gz]
+  -db, --ban-db PATH         File path to the SQLite database.  [default:
+                             ban.db]
+  -sep, --separator TEXT     CSV field separator.  [default: ;]
+  -chk, --chunksize INTEGER  Number of rows per chunk to process.  [default:
+                             10000]
+  -v, --verbose              More information displayed.
+  --help                     Show this message and exit.
+```
+- *Command local*
+```
+Usage: ban_geocoder.py local [OPTIONS]
+
+  Local geocoding using BAN database.
+
+Options:
+  -i, --input-file PATH           Addresses file to geocode  [required]
+  -ban, --local-database TEXT     Local BAN database for geocoding.
+                                  [required]
+  -p, --processes INTEGER         Adjust the number of processes based on your
+                                  machine for calculations.  [default: 40]
+  -csv, --output-csv PATH         Path to CSV file where results will be
+                                  saved.
+  -hdr, --include-header          Include header row in the CSV output.
+  -idx, --include-index           Include DataFrame index in the CSV / SQL
+                                  output.
+  -db, --output-db PATH           Path to SQLite database file where results
+                                  will be saved.
+  -t, --table-name TEXT           Name of the table to insert data into in the
+                                  SQLite database.  [default: data]
+  -m, --mode [fail|replace|append]
+                                  How to behave if the file already exists.
+                                  [default: append]
+  -v, --verbose                   More information displayed.
+  --help                          Show this message and exit.
+
 ```
 
 ## Examples
@@ -94,6 +144,28 @@ Options:
 -------------------------------------------------------------
 [+] Data exported successfully to table "data" in database "address.db".
 ```
+*create a local BAN database*
+```
+(.venv) ME > python .\ban_geocoder.py initdb --ban-url https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz --ban-db ban.db -v
+[+] Downloading BAN datasheet from https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz
+[+] File downloaded successfully: adresses-france.csv.gz
+[+] Uncompressing adresses-france.csv.gz to adresses-france.csv
+[+] Importing adresses-france.csv into SQLite database ban.db...
+[+] Database ban.db with table addresses_france created succesfully !
+[+] Optimize database...
+[+] Indexes in ban.db was created succesfully !
+```
+*using using local BAN database*
+```
+(.venv) ME > python .\ban_geocoder.py local -i .\data.txt --local-database .\ban.db -p 20 -v
+[+] Geocoding addresses...
+[+] Fetching addresses from .\ban.db...
+[+] Best match for "16 boulevard THIERS     21000   DIJON"  --->    16 Boulevard Thiers 21000 Dijon [47.323686, 5.049228] with a score of 100
+[+] Best match for "1 rue DE VELARS 21320   POUILLY EN AUXOIS"      --->    1 Rue de Velard 21320 Pouilly-en-Auxois [47.265765, 4.554323] with a score of 97
+[+] Best match for "Rue Claude Petiet       21400   CHATILLON SUR SEINE"    --->    2 Rue Claude Petiet 21400 Châtillon-sur-Seine [47.861858, 4.559604] with a score of 97
+[+] Best match for "21 rue de la Mare       21380   SAVIGNY LE SEC" --->    21 Rue de la Mare 21380 Savigny-le-Sec [47.431938, 5.050335] with a score of 100
+```
+
 
 ## See also
 * [BanR](https://github.com/joelgombin/banR) : R client for the BAN API
