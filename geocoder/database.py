@@ -2,7 +2,7 @@ import pandas as pd
 import sqlite3
 
 
-def import_csv_to_sqlite(csv_file_path, sqlite_db_path, table_name, separator, verbose, chunksize=10000):
+def import_csv_to_sqlite(csv_file_path, sqlite_db_path, table_name, separator, verbose, chunksize):
     """
     Import a large CSV file into a SQLite database in chunks.
 
@@ -26,18 +26,23 @@ def import_csv_to_sqlite(csv_file_path, sqlite_db_path, table_name, separator, v
     # Create a connection to the SQLite database
     conn = sqlite3.connect(sqlite_db_path)
     if verbose:
-        print(f"[+] Importing {csv_file_path} into SQLite database {sqlite_db_path}...")
-
-    # Iterate over the CSV file in chunks
-    for chunk in pd.read_csv(csv_file_path, chunksize=chunksize, sep=separator):
-        # Append each chunk to the specified table in the SQLite database
-        chunk.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
+        print(f"[+] Importing {csv_file_path} into SQLite database {sqlite_db_path}")
+    try:
+        # Read the CSV file and import data in chunks
+        for chunk in pd.read_csv(csv_file_path, chunksize=chunksize, sep=separator):
+            chunk.to_sql(name=table_name, con=conn, if_exists='append', index=False)
+            conn.commit()  # Commit after each chunk
+            if verbose:
+                print(f"[+] {len(chunk)} rows added to the database")
+    except Exception as e:
+        conn.rollback()  # Rollback on error
+        if verbose:
+            print(f"[!] An error occurred during import: {e}")
+    finally:
+        conn.close()  # Close the connection
 
     if verbose:
-        print(f"[+] Database {sqlite_db_path} with table {table_name} created succesfully !")
-
-    # Close the connection to the SQLite database
-    conn.close()
+        print(f"[+] CSV data import process completed.")
 
 
 def prepare_database(database, verbose):
