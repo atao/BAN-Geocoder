@@ -108,18 +108,19 @@ def geocoding_from_file(input_file, limit, output_csv, output_db, table_name, in
 
 
 @click.command(name="initdb")
-@click.option('--ban-url', '-csv', type=str, help='URL or file path to the BAN (Base Adresse Nationale) CSV datasheet.',
-              default='https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz',
+@click.option('--ban-datasheet', '-csv', type=str, help='Department number related of BAN (Base Adresse Nationale) CSV datasheet.',
+              default="france",
               show_default=True)
 @click.option('--ban-db', '-db', type=click.Path(writable=True), default='ban.db', show_default=True,
               help='File path to the SQLite database.')
 @click.option('--separator', '-sep', default=";", show_default=True, help='CSV field separator.')
 @click.option('--chunksize', '-chk', default=10000, show_default=True, help='Number of rows per chunk to process.')
 @click.option('--verbose', '-v', is_flag=True, help="More information displayed.")
-def initdb(ban_url, ban_db, separator, chunksize, verbose):
+def initdb(ban_datasheet, ban_db, separator, chunksize, verbose):
     """
     Creating local database with BAN datasheet to geocoding offline.
     """
+    ban_url = f'https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-{ban_datasheet}.csv.gz'
     ban_gz = ban_url.split("/")[-1]
     ban_csv = ban_gz.replace(".csv.gz", ".csv")
 

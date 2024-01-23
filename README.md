@@ -81,22 +81,16 @@ Options:
 ```
 - *Command initdb*
 ```
-Usage: ban_geocoder.py initdb [OPTIONS]
-
-  Creating local database with BAN datasheet to geocoding offline.
-
-Options:
-  -csv, --ban-url TEXT       URL or file path to the BAN (Base Adresse
-                             Nationale) CSV datasheet.  [default: https://adre
-                             sse.data.gouv.fr/data/ban/adresses/latest/csv/adr
-                             esses-france.csv.gz]
-  -db, --ban-db PATH         File path to the SQLite database.  [default:
-                             ban.db]
-  -sep, --separator TEXT     CSV field separator.  [default: ;]
-  -chk, --chunksize INTEGER  Number of rows per chunk to process.  [default:
-                             10000]
-  -v, --verbose              More information displayed.
-  --help                     Show this message and exit.
+Options:                                                                    
+  -csv, --ban-datasheet TEXT  Department number related of BAN (Base Adresse
+                              Nationale) CSV datasheet.  [default: france]
+  -db, --ban-db PATH          File path to the SQLite database.  [default:
+                              ban.db]
+  -sep, --separator TEXT      CSV field separator.  [default: ;]
+  -chk, --chunksize INTEGER   Number of rows per chunk to process.  [default:
+                              10000]
+  -v, --verbose               More information displayed.
+  --help                      Show this message and exit.
 ```
 - *Command local*
 ```
@@ -148,13 +142,13 @@ Options:
 -------------------------------------------------------------
 [+] Data exported successfully to table "data" in database "address.db".
 ```
-*create a local BAN database*
+*create a local BAN database with addresses from department 31*
 ```
-(.venv) ME > python .\ban_geocoder.py initdb --ban-url https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz --ban-db ban.db -v
-[+] Downloading BAN datasheet from https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz
-[+] File downloaded successfully: adresses-france.csv.gz
-[+] Uncompressing adresses-france.csv.gz to adresses-france.csv
-[+] Importing adresses-france.csv into SQLite database ban.db...
+(.venv) ME > python .\ban_geocoder.py initdb --ban-datasheet 31 --ban-db ban.db -v
+[+] Downloading BAN datasheet from https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-31.csv.gz
+[+] File downloaded successfully: adresses-31.csv.gz
+[+] Uncompressing adresses-31.csv.gz to adresses-31.csv
+[+] Importing adresses-31.csv into SQLite database ban.db...
 [+] Database ban.db with table addresses_france created succesfully !
 [+] Optimize database...
 [+] Indexes in ban.db was created succesfully !
