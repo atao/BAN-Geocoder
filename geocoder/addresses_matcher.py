@@ -19,6 +19,243 @@ class AddressesMatcher:
         input_address, addresses = args
         return process.extractOne(input_address, addresses)
 
+    @staticmethod
+    def standardize_address(address):
+        """
+        Replace common abbreviations in the address string.
+        """
+        replacements = {
+            # Norme XP Z 10-011
+            "ALL": "ALLÉE",
+            "AV": "AVENUE",
+            "BD": "BOULEVARD",
+            "CTRE": "CENTRE",
+            "CCAL": "CENTRE COMMERCIAL",
+            "CHEM": "CHEMIN",
+            "IMM": "IMMEUBLE",
+            "IMM": "IMMEUBLES",
+            "IMP": "IMPASSE",
+            "LD": "LIEU-DIT",
+            "LOT": "LOTISSEMENT",
+            "PAS": "PASSAGE",
+            "PL": "PLACE",
+            "RES": "RÉSIDENCE",
+            "RPT": "ROND-POINT",
+            "RTE": "ROUTE",
+            "SENT": "SENTIER",
+            "SQ": "SQUARE",
+            "VLGE": "VILLAGE",
+            "ZA": "ZONE D’ACTIVITÉ",
+            "ZAC": "ZONE D’AMÉNAGEMENT CONCERTÉ",
+            "ZAD": "ZONE D’AMÉNAGEMENT DIFFÉRÉ",
+            "ZI": "ZONE INDUSTRIELLE",
+
+            # Norme XP Z 10-011
+            "ADJ": "ADJUDANT",
+            "AERD": "AÉRODROME",
+            "AERG": "AÉROGARE",
+            "AERN": "AÉORONAUTIQUE",
+            "AERP": "AÉROPORT",
+            "AGCE": "AGENCE",
+            "AGRIC": "AGRICOLE",
+            "ANC": "ANCIEN",
+            "ANC": "ANCIENNEMENT",
+            "APP": "APPARTEMENT",
+            "APP": "APPARTEMENTS",
+            "ARMT": "ARMEMENT",
+            "ARR": "ARRONDISSEMENT",
+            "ASP": "ASPIRANT",
+            "ASSOC": "ASSOCIATION",
+            "ASSUR": "ASSURANCE",
+            "AT": "ATELIER",
+            "BRQ": "BARAQUEMENT",
+            "BAS": "BAS",
+            "BAS": "BASSE",
+            "BAS": "BASSES",
+            "BTN": "BATAILLON",
+            "BTN": "BATAILLONS",
+            "BAT": "BÂTIMENT",
+            "BAT": "BÂTIMENTS",
+            "B": "BIS",
+            "BP": "BOITE POSTALE",
+            "CAB": "CABINET",
+            "CANT": "CANTON",
+            "CDL": "CARDINAL",
+            "CP": "CASE POSTALE",
+            "CHBR": "CHAMBRE",
+            "CTD": "CITADELLE",
+            "COLL": "COLLÈGE",
+            "CNL": "COLONEL",
+            "COLO": "COLONIE",
+            "CTE": "COMITÉ",
+            "CDT": "COMMANDANT",
+            "CIAL": "COMMERCIAL",
+            "COM": "COMMUNE",
+            "COM": "COMMUNEAL",
+            "COM": "COMMUNEAUX",
+            "CIE": "COMPAGNIE",
+            "COMP": "COMPAGNON",
+            "COMP": "COMPAGNONS",
+            "COOP": "COOPÉRATIVE",
+            "CS": "COURSE SPÉCIALE",
+            "CRX": "CROIX",
+            "DELEG": "DÉLÉGATION",
+            "DEP": "DÉPARTEMENTAL",
+            "DEP": "DÉPARTEMENTALAUX",
+            "DIR": "DIRECTEUR",
+            "DIR": "DIRECTEURCTION",
+            "DIV": "DIVISION",
+            "DR": "DOCTEUR",
+            "ECO": "ECONOMIE",
+            "ECO": "ECONOMIEQUE",
+            "ECRIV": "ECRIVAIN",
+            "ENST": "ENSEIGNEMENT",
+            "ENS": "ENSEMBLE",
+            "ENT": "ENTRÉE",
+            "ENT": "ENTRÉES",
+            "ENTR": "ENTREPRISE",
+            "EP": "EPOUX",
+            "EP": "EPOUSE",
+            "ETS": "ETABLISSEMENT",
+            "ETG": "ETAGE",
+            "EM": "ETAT MAJOR",
+            "EVQ": "EVÊQUE",
+            "FAC": "FACULTÉ",
+            "FOR": "FORÊT",
+            "FOR": "FORESTIER",
+            "FR": "FRANÇAIS",
+            "FR": "FRANÇAISE",
+            "FUS": "FUSILIER",
+            "GEND": "GENDARMERIE",
+            "GAL": "GÉNÉRAL",
+            "GOUV": "GOUVERNEMENTAL",
+            "GOU": "GOUVERNEUR",
+            "GD": "GRAND",
+            "GDE": "GRANDE",
+            "GDES": "GRANDES",
+            "GDS": "GRANDS",
+            "HT": "HAUT",
+            "HTE": "HAUTE",
+            "HTES": "HAUTES",
+            "HTS": "HAUTS",
+            "HOP": "HÔPITAL",
+            "HOP": "HÔPITAUX",
+            "HOSP": "HOSPICE",
+            "HOSP": "HOSPITALIER",
+            "HOT": "HÔTEL",
+            "INFANT": "INFANTERIE",
+            "INF": "INFÉRIEUR",
+            "INF": "INFÉRIEURE",
+            "ING": "INGÉNIEUR",
+            "INSP": "INSPECTEUR",
+            "INST": "INSTITUT",
+            "INTERN": "INTERNATIONAL",
+            "INTERN": "INTERNATIONALE",
+            "LABO": "LABORATOIRE",
+            "LT": "LIEUTENANT",
+            "LTDV": "LIEUTENANT DE VAISSEAU",
+            "MME": "MADAME",
+            "MLLE": "MADEMOISELLE",
+            "MAG": "MAGASIN",
+            "MAIS": "MAISON",
+            "ME": "MAÎTRE",
+            "MAL": "MARÉCHAL",
+            "MAR": "MARITIME",
+            "MED": "MÉDECIN",
+            "MED": "MÉDICAL",
+            "MMES": "MESDAMES",
+            "MLLES": "MESDEMOISELLES",
+            "MM": "MESSIEURS",
+            "MIL": "MILITAIRE",
+            "MIN": "MINISTÈRE",
+            "MGR": "MONSEIGNEUR",
+            "M": "MONSIEUR",
+            "MUN": "MUNICIPAL",
+            "MUT": "MUTUEL",
+            "NAL": "NATIONAL",
+            "ND": "NOTRE DAME",
+            "NOUV": "NOUVEAU",
+            "NOUV": "NOUVELLE",
+            "OBS": "OBSERVATOIRE",
+            "PAST": "PASTEUR",
+            "PT": "PETIT",
+            "PTE": "PETITE",
+            "PTES": "PETITES",
+            "PTS": "PETITS",
+            "POL": "POLICE",
+            "PREF": "PRÉFET",
+            "PREF": "PRÉFÉCTURE",
+            "PDT": "PRÉSIDENT",
+            "PR": "PROFESSEUR",
+            "PROF": "PROFESSIONEL",
+            "PROF": "PROFESSIONELE",
+            "PROL": "PROLONGÉ",
+            "PROL": "PROLONGÉE",
+            "PROP": "PROPRIÉTÉ",
+            "Q": "QUATER",
+            "C": "QUINQUIES",
+            "RECT": "RECTEUR",
+            "RGT": "RÉGIMENT",
+            "REG": "RÉGION",
+            "REG": "RÉGIONAL",
+            "REP": "RÉPUBLIQUE",
+            "REST": "RESTAURANT",
+            "ST": "SAINT",
+            "STE": "SAINTE",
+            "STES": "SAINTES",
+            "STS": "SAINTS",
+            "SANA": "SANATORIUM",
+            "SGT": "SERGENT",
+            "SCE": "SERVICE",
+            "SOC": "SOCIÉTÉ",
+            "SC": "SOUS COUVERT",
+            "SPREF": "SOUS-PRÉFET",
+            "SUP": "SUPÉRIEUR",
+            "SUP": "SUPÉRIEURE",
+            "SYND": "SYNDICAT",
+            "TECH": "TECHNICIEN",
+            "TECH": "TECHNIQUE",
+            "T": "TER",
+            "TSA": "TRI SERVICE ARRIVÉE",
+            "TUN": "TUNNEL",
+            "UNVT": "UNIVERSITAIRE",
+            "UNIV": "UNIVERSITÉ",
+            "VELOD": "VÉLODROME",
+            "VVE": "VEUVE",
+            "VIEL": "VIEILLE",
+            "VIEL": "VIEILLES",
+            "VX": "VIEUX",
+
+            # Added
+            "R": "RUE",
+        }
+
+        # Define a regex pattern to match a number at the beginning of the address
+        pattern_number = re.compile(r'^(\d+)\b')
+
+        # Define a regex pattern to match the first or second word in the address
+        pattern_word = re.compile(r'\b(\w+)\b')
+
+        # Check if the address starts with a number
+        if pattern_number.match(address):
+            # TODO Find and replace some word like " GAL " in address (Split more 2 parts, and parse all parts...
+            # If it does, split the address and replace the second word
+            parts = address.split(maxsplit=2)  # Split into three parts: number, word to replace, the rest
+            if len(parts) > 1 and parts[1].upper() in replacements:
+                for val in replacements:
+                    if parts[1].upper() == val:
+                        parts[1] = replacements[val].capitalize()  # Replace the second word if it's in the replacements
+            standardized_address = ' '.join(parts)
+        else:
+            # If it doesn't start with a number, replace the first word
+            match = pattern_word.search(address)
+            if match and match.group(0) in replacements:
+                standardized_address = pattern_word.sub(replacements[match.group(0)], address, count=1)
+            else:
+                standardized_address = address
+
+        return standardized_address
+
     def geocode_addresses(self, input_file):
         """
         Geocode a list of addresses using multiple processes.
@@ -48,19 +285,43 @@ class AddressesMatcher:
         conn = sqlite3.connect(self.database)
         cursor = conn.cursor()
 
+        keywords = ['Allée', 'Avenue', 'Boulevard', 'Centre', 'Centre commercial', 'Chemin', 'Immeuble',
+                    'Immeubles', 'Impasse', 'Lieu-dit', 'Lieu dit', 'Lotissement', 'Passage', 'Place', 'Résidence',
+                    'Rond-point', 'Route', 'Sentier', 'Square', 'Village', 'Zone d’activité',
+                    'Zone d’aménagement concerté', 'Zone d’aménagement différé', 'Zone industrielle']
+
         with open(input_file, "r") as addresses_to_geocode:
 
             # Process each address to geocode
             for address_to_geocode in addresses_to_geocode:
                 address_to_geocode = address_to_geocode.strip()
 
+                # Standardize the address before processing
+                standardized_address = self.standardize_address(address_to_geocode)
+
                 # Extract the starting number from the input address using regular expression
-                starting_number_match = re.match(r'^\d+', address_to_geocode)
+                starting_number_match = re.match(r'^\d+', standardized_address)
                 starting_number = starting_number_match.group(0) if starting_number_match else None
 
                 # Attempt to extract a 5-digit postal code from the input address
-                postal_code_match = re.search(r'\b\d{5}\b', address_to_geocode)
+                postal_code_match = re.search(r'\b\d{5}\b', standardized_address)
                 postal_code = postal_code_match.group(0) if postal_code_match else None
+
+                # Determine if the first or second word is one of the keywords
+                address_parts = standardized_address.split(maxsplit=2)  # Split into parts
+                potential_keywords = [address_parts[0]]  # Assume first part is a keyword
+                if starting_number and len(address_parts) > 1:
+                    # If the first part is a number, consider the second part as a keyword
+                    potential_keywords = [address_parts[1]]
+
+                # Create a nom_afnor WHERE clause to match any entry starting with the keyword
+                nom_afnor_clause = '1=1'  # Default to true if no keyword is matched
+                for keyword in keywords:
+                    upper_keyword = keyword.upper()
+                    if upper_keyword in standardized_address.upper():
+                        # Use the UPPER function to perform case-insensitive match
+                        nom_afnor_clause = f"nom_afnor LIKE '{keyword.upper()}%'"
+                        break  # Stop after the first match
 
                 # If a starting number is found, include it in the SQL WHERE clause
                 number_clause = f"numero = {starting_number}" if starting_number else "1=1"
@@ -69,13 +330,13 @@ class AddressesMatcher:
                 postal_code_clause = f"code_postal = {postal_code}" if postal_code else "1=1"
 
                 # Combine the two clauses with an AND operator
-                where_clause = f"{number_clause} AND {postal_code_clause}"
+                where_clause = f"{number_clause} AND {postal_code_clause} AND {nom_afnor_clause}"
 
                 # Address query with consideration for "rep" values and the "where_clause"
-                cursor.execute(f""" SELECT CASE WHEN rep IS NOT NULL AND trim(rep) != '' THEN numero || ' ' || rep || ' ' 
+                sqlquery = f"""SELECT CASE WHEN rep IS NOT NULL AND trim(rep) != '' THEN numero || ' ' || rep || ' ' 
                 || nom_voie ELSE numero || ' ' || nom_voie END || ' ' || code_postal || ' ' || nom_commune AS address, 
-                lat, lon FROM addresses WHERE {where_clause}
-                            """)
+                lat, lon FROM addresses WHERE {where_clause}"""
+                cursor.execute(sqlquery)
 
                 # Fetch the results including address, lat, and lon
                 address_results = cursor.fetchall()
@@ -84,13 +345,13 @@ class AddressesMatcher:
 
                 # Split the address list into chunks for each process
                 chunks = [addresses[i::self.num_processes] for i in range(self.num_processes)]
-                results = pool.map(self.match_address, [(address_to_geocode, chunk) for chunk in chunks])
+                results = pool.map(self.match_address, [(standardized_address, chunk) for chunk in chunks])
                 # Filter out None results
                 results = [result for result in results if result is not None]
 
                 # Find the best overall match from the results
                 best_match = max(results, key=lambda x: x[1]) if results else None
-                best_matches[address_to_geocode] = best_match
+                best_matches[standardized_address] = best_match
 
                 # After finding the best match, get the lat and lon from the dictionary
                 if best_match:
@@ -99,14 +360,15 @@ class AddressesMatcher:
                     if lat is not None and lon is not None:
                         geocoded[matched_address] = "{}, {}".format(lat, lon)
                         if self.verbose:
-                            print(f'[+] Best match for "{address_to_geocode}"\t--->\t{matched_address} [{lat}, {lon}] with a score of {match_score}')
+                            print(
+                                f'[+] Best match for "{standardized_address}"\t--->\t{matched_address} [{lat}, {lon}] with a score of {match_score}')
                     else:
                         if self.verbose:
                             print(f'Coordinates for matched address "{matched_address}" not found.')
                         pass
                 else:
                     if self.verbose:
-                        print(f'No match found for "{address_to_geocode}".')
+                        print(f'No match found for "{standardized_address}".')
                     pass
 
             # Close the pool of worker processes after processing all addresses
