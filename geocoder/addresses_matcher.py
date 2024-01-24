@@ -230,30 +230,18 @@ class AddressesMatcher:
             "R": "RUE",
         }
 
-        # Define a regex pattern to match a number at the beginning of the address
-        pattern_number = re.compile(r'^(\d+)\b')
-
-        # Define a regex pattern to match the first or second word in the address
-        pattern_word = re.compile(r'\b(\w+)\b')
-
-        # Check if the address starts with a number
-        if pattern_number.match(address):
-            # TODO Find and replace some word like " GAL " in address (Split more 2 parts, and parse all parts...
-            # If it does, split the address and replace the second word
-            parts = address.split(maxsplit=2)  # Split into three parts: number, word to replace, the rest
-            if len(parts) > 1 and parts[1].upper() in replacements:
-                for val in replacements:
-                    if parts[1].upper() == val:
-                        parts[1] = replacements[val].capitalize()  # Replace the second word if it's in the replacements
+        parts = address.split()
+        if len(parts) > 1:
+            n = 0
+            while n != len(parts):
+                if parts[n].upper() in replacements:
+                    for val in replacements:
+                        if parts[n].upper() == val:
+                            parts[n] = replacements[val].capitalize()
+                n = n + 1
             standardized_address = ' '.join(parts)
         else:
-            # If it doesn't start with a number, replace the first word
-            match = pattern_word.search(address)
-            if match and match.group(0) in replacements:
-                standardized_address = pattern_word.sub(replacements[match.group(0)], address, count=1)
-            else:
-                standardized_address = address
-
+            standardized_address = address
         return standardized_address
 
     def geocode_addresses(self, input_file):
@@ -317,10 +305,15 @@ class AddressesMatcher:
                 # Create a nom_afnor WHERE clause to match any entry starting with the keyword
                 nom_afnor_clause = '1=1'  # Default to true if no keyword is matched
                 for keyword in keywords:
-                    upper_keyword = keyword.upper()
-                    if upper_keyword in standardized_address.upper():
+                    if keyword.upper() in standardized_address.upper():
                         # Use the UPPER function to perform case-insensitive match
-                        nom_afnor_clause = f"nom_afnor LIKE '{keyword.upper()}%'"
+                        nom_afnor_clause = f"nom_afnor LIKE '%{keyword.upper()}%"
+                        pattern_word = re.compile(r'\b(\w+)\b \d+')
+                        m = re.search(pattern_word, standardized_address)
+                        if m is not None:
+                            nom_afnor_clause = f"{nom_afnor_clause}{m.group(1).upper()}%'"
+                        else:
+                            nom_afnor_clause = f"{nom_afnor_clause}'"
                         break  # Stop after the first match
 
                 # If a starting number is found, include it in the SQL WHERE clause
