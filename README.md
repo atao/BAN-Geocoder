@@ -103,7 +103,7 @@ Options:
   -ban, --local-database TEXT     Local BAN database for geocoding.
                                   [required]
   -p, --processes INTEGER         Adjust the number of processes based on your
-                                  machine for calculations.  [default: 40]
+                                  machine for calculations.  [default: 12]
   -csv, --output-csv PATH         Path to CSV file where results will be
                                   saved.
   -hdr, --include-header          Include header row in the CSV output.

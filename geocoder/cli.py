@@ -142,7 +142,7 @@ def initdb(ban_datasheet, ban_db, separator, chunksize, verbose):
 @click.command(name="local")
 @click.option('--input-file', '-i', help='Addresses file to geocode', required=True, type=click.Path(exists=True))
 @click.option('--local-database', '-ban', required=True, help='Local BAN database for geocoding.')
-@click.option('--processes', '-p', default=40, show_default=True, help='Adjust the number of processes based on your '
+@click.option('--processes', '-p', default=12, show_default=True, help='Adjust the number of processes based on your '
                                                                        'machine for calculations.')
 @click.option('--output-csv', '-csv', type=click.Path(writable=True),
               help='Path to CSV file where results will be saved.')
