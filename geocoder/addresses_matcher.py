@@ -233,6 +233,7 @@ class AddressesMatcher:
         # Remove ","
         address = address.replace(",","").strip()
         address = address.replace(";","").strip()
+        address = address.replace(":","").strip()
 
         parts = address.split()
         if len(parts) > 1:
