@@ -231,9 +231,9 @@ class AddressesMatcher:
         }
 
         # Remove ","
-        address = address.replace(",","").strip()
-        address = address.replace(";","").strip()
-        address = address.replace(":","").strip()
+        address = address.replace(",", "").strip()
+        address = address.replace(";", "").strip()
+        address = address.replace(":", "").strip()
 
         parts = address.split()
         if len(parts) > 1:
@@ -256,17 +256,6 @@ class AddressesMatcher:
         if self.verbose:
             print("[+] Geocoding addresses...")
 
-        conn = sqlite3.connect(self.database)
-        cursor = conn.cursor()
-
-        # Fetch all addresses from the database and store them in memory
-        if self.verbose:
-            print(f"[+] Fetching addresses from {self.database}...")
-        cursor.execute(
-            "SELECT numero || ' ' || rep || ' ' || nom_voie || ' ' || code_postal || ' ' || nom_commune AS address FROM addresses")
-        addresses = [row[0] for row in cursor.fetchall()]
-        conn.close()  # Close the connection after fetching the data
-
         # Initialize the pool of worker processes once
         pool = Pool(processes=self.num_processes)
 
@@ -288,85 +277,87 @@ class AddressesMatcher:
             # Process each address to geocode
             for address_to_geocode in addresses_to_geocode:
                 address_to_geocode = address_to_geocode.strip()
+                if len(address_to_geocode) != 0:
+                    # Standardize the address before processing
+                    standardized_address = self.standardize_address(address_to_geocode)
 
-                # Standardize the address before processing
-                standardized_address = self.standardize_address(address_to_geocode)
+                    # Extract the starting number from the input address using regular expression
+                    starting_number_match = re.match(r'^\d+', standardized_address)
+                    starting_number = starting_number_match.group(0) if starting_number_match else None
 
-                # Extract the starting number from the input address using regular expression
-                starting_number_match = re.match(r'^\d+', standardized_address)
-                starting_number = starting_number_match.group(0) if starting_number_match else None
+                    # Attempt to extract a 5-digit postal code from the input address
+                    postal_code_match = re.search(r'\b\d{5}\b', standardized_address)
+                    postal_code = postal_code_match.group(0) if postal_code_match else None
 
-                # Attempt to extract a 5-digit postal code from the input address
-                postal_code_match = re.search(r'\b\d{5}\b', standardized_address)
-                postal_code = postal_code_match.group(0) if postal_code_match else None
+                    # Determine if the first or second word is one of the keywords
+                    address_parts = standardized_address.split(maxsplit=2)  # Split into parts
+                    potential_keywords = [address_parts[0]]  # Assume first part is a keyword
+                    if starting_number and len(address_parts) > 1:
+                        # If the first part is a number, consider the second part as a keyword
+                        potential_keywords = [address_parts[1]]
 
-                # Determine if the first or second word is one of the keywords
-                address_parts = standardized_address.split(maxsplit=2)  # Split into parts
-                potential_keywords = [address_parts[0]]  # Assume first part is a keyword
-                if starting_number and len(address_parts) > 1:
-                    # If the first part is a number, consider the second part as a keyword
-                    potential_keywords = [address_parts[1]]
+                    # Create a nom_afnor WHERE clause to match any entry starting with the keyword
+                    nom_afnor_clause = '1=1'  # Default to true if no keyword is matched
+                    for keyword in keywords:
+                        if keyword.upper() in standardized_address.upper():
+                            # Use the UPPER function to perform case-insensitive match
+                            nom_afnor_clause = f"nom_afnor LIKE '%{keyword.upper()}%"
+                            pattern_word = re.compile(r'\b(\w+)\b \d+')
+                            m = re.search(pattern_word, standardized_address)
+                            if m is not None:
+                                nom_afnor_clause = f"{nom_afnor_clause}{m.group(1).upper()}%'"
+                            else:
+                                nom_afnor_clause = f"{nom_afnor_clause}'"
+                            break  # Stop after the first match
 
-                # Create a nom_afnor WHERE clause to match any entry starting with the keyword
-                nom_afnor_clause = '1=1'  # Default to true if no keyword is matched
-                for keyword in keywords:
-                    if keyword.upper() in standardized_address.upper():
-                        # Use the UPPER function to perform case-insensitive match
-                        nom_afnor_clause = f"nom_afnor LIKE '%{keyword.upper()}%"
-                        pattern_word = re.compile(r'\b(\w+)\b \d+')
-                        m = re.search(pattern_word, standardized_address)
-                        if m is not None:
-                            nom_afnor_clause = f"{nom_afnor_clause}{m.group(1).upper()}%'"
+                    # If a starting number is found, include it in the SQL WHERE clause
+                    number_clause = f"numero = {starting_number}" if starting_number else "1=1"
+
+                    # If a postal code is found, include it in the SQL WHERE clause
+                    postal_code_clause = f"code_postal = {postal_code}" if postal_code else "1=1"
+
+                    # Combine the two clauses with an AND operator
+                    where_clause = f"{number_clause} AND {postal_code_clause} AND {nom_afnor_clause}"
+
+                    # Address query with consideration for "rep" values and the "where_clause"
+                    sqlquery = f"""SELECT CASE WHEN rep IS NOT NULL AND trim(rep) != '' THEN numero || ' ' || rep || ' ' 
+                    || nom_voie ELSE numero || ' ' || nom_voie END || ' ' || code_postal || ' ' || nom_commune AS address, 
+                    lat, lon FROM addresses WHERE {where_clause}"""
+                    cursor.execute(sqlquery)
+
+                    # Fetch the results including address, lat, and lon
+                    address_results = cursor.fetchall()
+                    addresses = [row[0] for row in address_results]
+                    address_lat_lon_map = {row[0]: (row[1], row[2]) for row in address_results}
+
+                    # Split the address list into chunks for each process
+                    chunks = [addresses[i::self.num_processes] for i in range(self.num_processes)]
+                    results = pool.map(self.match_address, [(standardized_address, chunk) for chunk in chunks])
+                    # Filter out None results
+                    results = [result for result in results if result is not None]
+
+                    # Find the best overall match from the results
+                    best_match = max(results, key=lambda x: x[1]) if results else None
+                    best_matches[standardized_address] = best_match
+
+                    # After finding the best match, get the lat and lon from the dictionary
+                    if best_match:
+                        matched_address, match_score = best_match
+                        lat, lon = address_lat_lon_map.get(matched_address, (None, None))
+                        if lat is not None and lon is not None:
+                            geocoded[matched_address] = "{}, {}".format(lat, lon)
+                            if self.verbose:
+                                print(
+                                    f'[+] Best match for "{standardized_address}"\t--->\t{matched_address} [{lat}, {lon}] with a score of {match_score}')
                         else:
-                            nom_afnor_clause = f"{nom_afnor_clause}'"
-                        break  # Stop after the first match
-
-                # If a starting number is found, include it in the SQL WHERE clause
-                number_clause = f"numero = {starting_number}" if starting_number else "1=1"
-
-                # If a postal code is found, include it in the SQL WHERE clause
-                postal_code_clause = f"code_postal = {postal_code}" if postal_code else "1=1"
-
-                # Combine the two clauses with an AND operator
-                where_clause = f"{number_clause} AND {postal_code_clause} AND {nom_afnor_clause}"
-
-                # Address query with consideration for "rep" values and the "where_clause"
-                sqlquery = f"""SELECT CASE WHEN rep IS NOT NULL AND trim(rep) != '' THEN numero || ' ' || rep || ' ' 
-                || nom_voie ELSE numero || ' ' || nom_voie END || ' ' || code_postal || ' ' || nom_commune AS address, 
-                lat, lon FROM addresses WHERE {where_clause}"""
-                cursor.execute(sqlquery)
-
-                # Fetch the results including address, lat, and lon
-                address_results = cursor.fetchall()
-                addresses = [row[0] for row in address_results]
-                address_lat_lon_map = {row[0]: (row[1], row[2]) for row in address_results}
-
-                # Split the address list into chunks for each process
-                chunks = [addresses[i::self.num_processes] for i in range(self.num_processes)]
-                results = pool.map(self.match_address, [(standardized_address, chunk) for chunk in chunks])
-                # Filter out None results
-                results = [result for result in results if result is not None]
-
-                # Find the best overall match from the results
-                best_match = max(results, key=lambda x: x[1]) if results else None
-                best_matches[standardized_address] = best_match
-
-                # After finding the best match, get the lat and lon from the dictionary
-                if best_match:
-                    matched_address, match_score = best_match
-                    lat, lon = address_lat_lon_map.get(matched_address, (None, None))
-                    if lat is not None and lon is not None:
-                        geocoded[matched_address] = "{}, {}".format(lat, lon)
-                        if self.verbose:
-                            print(
-                                f'[+] Best match for "{standardized_address}"\t--->\t{matched_address} [{lat}, {lon}] with a score of {match_score}')
+                            if self.verbose:
+                                print(f'Coordinates for matched address "{matched_address}" not found.')
+                            pass
                     else:
                         if self.verbose:
-                            print(f'Coordinates for matched address "{matched_address}" not found.')
+                            print(f'No match found for "{standardized_address}".')
                         pass
                 else:
-                    if self.verbose:
-                        print(f'No match found for "{standardized_address}".')
                     pass
 
             # Close the pool of worker processes after processing all addresses
