@@ -1,4 +1,3 @@
-[![Pylint](https://github.com/atao/BAN-Geocoder/actions/workflows/pylint.yml/badge.svg)](https://github.com/atao/BAN-Geocoder/actions/workflows/pylint.yml)
 # BAN Geocoder
 🗺️ Geocoding addresses with BAN !
 
